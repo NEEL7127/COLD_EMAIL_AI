@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cold Email AI</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0f1a 0%, #1a0f2e 100%);
+      font-family: 'Segoe UI', sans-serif;
+      color: #e2e8f0;
+      padding: 40px 20px;
+    }
+
+    /* HEADER */
+    .header { text-align:center; margin-bottom:32px; }
+
+    .badge {
+      display: inline-block;
+      background: rgba(139,92,246,0.15);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 100px;
+      padding: 6px 20px;
+      font-size: 12px;
+      color: #a78bfa;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 5vw, 42px);
+      font-weight: 900;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle { color: #64748b; font-size: 15px; }
+
+    /* PLAN BAR */
+    .plan-bar {
+      max-width: 800px;
+      margin: 0 auto 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 16px 24px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .plan-bar-left { font-size: 13px; color: #94a3b8; }
+    .plan-bar-left span { color: #e2e8f0; font-weight: 600; }
+
+    .plan-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .plan-badge {
+      padding: 5px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .plan-free     { background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+    .plan-monthly  { background: rgba(99,102,241,0.2);  color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+    .plan-lifetime { background: rgba(234,179,8,0.2);   color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+
+    .plan-info { font-size: 12px; color: #64748b; }
+
+    .upgrade-btn {
+      background: rgba(139,92,246,0.15);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: #a78bfa;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* MAIN CARD */
+    .card {
+      max-width: 800px;
+      margin: 0 auto 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 32px;
+    }
+
+    /* FORM */
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) { .row-2 { grid-template-columns: 1fr; } }
+
+    label {
+      display: block;
+      font-size: 11px;
+      color: #94a3b8;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .hint {
+      color: #475569;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 11px;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #e2e8f0;
+      font-size: 14px;
+      outline: none;
+      font-family: 'Segoe UI', sans-serif;
+      transition: border 0.2s;
+    }
+
+    input:focus, textarea:focus { border-color: rgba(139,92,246,0.5); }
+    textarea { resize: vertical; line-height: 1.6; }
+    .char-count { font-size: 11px; color: #334155; margin-top: 6px; }
+
+    /* TONE */
+    .tone-group { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .tone-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      padding: 8px 18px;
+      font-size: 13px;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tone-btn.active {
+      background: rgba(139,92,246,0.3);
+      border-color: rgba(139,92,246,0.6);
+      color: #c4b5fd;
+      font-weight: 700;
+    }
+
+    /* BUTTONS */
+    .generate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+
+    .generate-btn:hover    { opacity: 0.9; transform: translateY(-1px); }
+    .generate-btn:disabled { background: rgba(139,92,246,0.3); cursor: not-allowed; transform: none; }
+
+    /* ERROR */
+    .error-box {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #f87171;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    /* RESULT CARD */
+    .result-card {
+      max-width: 800px;
+      margin: 0 auto 24px;
+      background: rgba(139,92,246,0.05);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 20px;
+      padding: 32px;
+      display: none;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .result-title { font-size: 18px; color: #c4b5fd; font-weight: 700; }
+
+    .copy-btn {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: #94a3b8;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .copy-btn.copied {
+      background: rgba(34,197,94,0.2);
+      border-color: rgba(34,197,94,0.4);
+      color: #4ade80;
+    }
+
+    .result-label {
+      font-size: 11px;
+      color: #6366f1;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .subject-box {
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #e0e7ff;
+      margin-bottom: 20px;
+    }
+
+    .body-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      margin-bottom: 16px;
+    }
+
+    .regen-btn {
+      background: transparent;
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 13px;
+      color: #a78bfa;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .regen-btn:hover { background: rgba(139,92,246,0.1); }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #13131f;
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .modal-icon { font-size: 36px; margin-bottom: 12px; }
+
+    .modal h2 {
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .modal-subtitle { color: #64748b; font-size: 14px; margin-bottom: 28px; }
+
+    /* PRICING GRID */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 480px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+    .pricing-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: left;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .pricing-card:hover {
+      border-color: rgba(139,92,246,0.4);
+      background: rgba(139,92,246,0.05);
+      transform: translateY(-2px);
+    }
+
+    .pricing-card.popular {
+      border-color: rgba(139,92,246,0.4);
+      background: rgba(139,92,246,0.07);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border-radius: 100px;
+      padding: 3px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .price { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .price span { font-size: 13px; color: #64748b; font-weight: 400; }
+    .plan-name  { font-size: 13px; color: #94a3b8; margin-bottom: 12px; }
+    .feature    { font-size: 12px; color: #cbd5e1; margin-bottom: 5px; }
+    .note       { font-size: 11px; color: #475569; margin-top: 8px; line-height: 1.5; }
+
+    .pay-btn {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+
+    .pay-btn:hover  { opacity: 0.9; transform: translateY(-1px); }
+    .pay-monthly    { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .pay-lifetime   { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+    .pay-maint      { background: linear-gradient(135deg, #10b981, #14b8a6); }
+
+    /* MAINTENANCE */
+    .maintenance-section {
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    .maintenance-box {
+      background: rgba(16,185,129,0.07);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: left;
+    }
+
+    .maintenance-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #4ade80;
+      margin-bottom: 6px;
+    }
+
+    .maintenance-desc {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 14px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #475569;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    /* HELPERS */
+    .mb-20 { margin-bottom: 20px; }
+    .mb-24 { margin-bottom: 24px; }
+
+    /* SPINNER */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes fadeIn  {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.4s ease; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge">✉️ AI POWERED</div>
+    <h1>Cold Email AI</h1>
+    <p class="subtitle">Paste any LinkedIn profile → personalized cold email in seconds</p>
+  </div>
+
+  <!-- PLAN BAR -->
+  <div class="plan-bar" id="planBar">
+    <div class="plan-bar-left">
+      Logged in as: <span id="planEmail"></span>
+    </div>
+    <div class="plan-bar-right">
+      <span id="planBadge" class="plan-badge plan-free">🆓 Free</span>
+      <span id="planInfo"  class="plan-info"></span>
+      <button class="upgrade-btn" onclick="openPricing()">⚡ Upgrade</button>
+    </div>
+  </div>
+
+  <!-- INPUT CARD -->
+  <div class="card">
+
+    <div class="row-2">
+      <div>
+        <label>Your Name</label>
+        <input id="senderName" type="text" placeholder="e.g. Neel Deshmane"/>
+      </div>
+      <div>
+        <label>What You're Offering</label>
+        <input id="senderProduct" type="text" placeholder="e.g. AI chatbot for businesses"/>
+      </div>
+    </div>
+
+    <div class="mb-20">
+      <label>Your Email <span class="hint">(used to track your plan)</span></label>
+      <input id="userEmail" type="email" placeholder="e.g. neel@gmail.com"
+             onchange="onEmailChange(this.value)"/>
+    </div>
+
+    <div class="mb-20">
+      <label>Email Tone</label>
+      <div class="tone-group">
+        <button class="tone-btn active" data-tone="professional">💼 Professional</button>
+        <button class="tone-btn"        data-tone="casual">😊 Casual</button>
+        <button class="tone-btn"        data-tone="bold">🔥 Bold</button>
+        <button class="tone-btn"        data-tone="humble">🙏 Humble</button>
+      </div>
+    </div>
+
+    <div class="mb-24">
+      <label>
+        Paste LinkedIn Profile Text
+        <span class="hint">(Open profile → Ctrl+A → Ctrl+C → paste here)</span>
+      </label>
+      <textarea id="linkedinProfile" rows="8"
+        placeholder="Paste LinkedIn profile text here...
+
+Example:
+John Smith
+Head of Sales at TechCorp
+Mumbai | 500+ connections
+Building B2B sales teams. Previously grew revenue 4x at a Series A startup."></textarea>
+      <div class="char-count" id="charCount">0 characters pasted</div>
+    </div>
+
+    <div class="error-box" id="errorBox">
+      ⚠️ <span id="errorMsg"></span>
+    </div>
+
+    <button class="generate-btn" id="generateBtn" onclick="generateEmail()">
+      ✨ Generate Cold Email
+    </button>
+
+  </div>
+
+  <!-- RESULT CARD -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div class="result-title">✅ Your Cold Email</div>
+      <button class="copy-btn" id="copyBtn" onclick="copyEmail()">📋 Copy Email</button>
+    </div>
+    <div class="result-label">Subject Line</div>
+    <div class="subject-box" id="subjectBox"></div>
+    <div class="result-label">Email Body</div>
+    <div class="body-box" id="bodyBox"></div>
+    <button class="regen-btn" onclick="generateEmail()">🔄 Regenerate Different Version</button>
+  </div>
+
+  <!-- PRICING MODAL -->
+  <div class="modal-overlay" id="pricingModal">
+    <div class="modal">
+      <div class="modal-icon">⚡</div>
+      <h2>Upgrade Your Plan</h2>
+      <p class="modal-subtitle">You've used your 1 free email. Choose a plan to continue.</p>
+
+      <div class="pricing-grid">
+
+        <div class="pricing-card popular">
+          <div class="popular-badge">⭐ Most Popular</div>
+          <div class="price">₹500 <span>/month</span></div>
+          <div class="plan-name">Monthly Plan</div>
+          <div class="feature">✅ Unlimited cold emails</div>
+          <div class="feature">✅ All 4 tone styles</div>
+          <div class="feature">✅ New AI features included</div>
+          <div class="note">Auto-expires after 1 month. Renew anytime.</div>
+          <button class="pay-btn pay-monthly" onclick="startPayment('monthly', 50000)">
+            💳 Pay ₹500/month
+          </button>
+        </div>
+
+        <div class="pricing-card">
+          <div class="price">₹3,000 <span>once</span></div>
+          <div class="plan-name">Lifetime Plan</div>
+          <div class="feature">✅ Lifetime access</div>
+          <div class="feature">✅ Unlimited emails forever</div>
+          <div class="feature">✅ All future features</div>
+          <div class="note">+ ₹200/month maintenance after 1st month. Keeps your account active and supported.</div>
+          <button class="pay-btn pay-lifetime" onclick="startPayment('lifetime', 300000)">
+            🔥 Pay ₹3,000 Lifetime
+          </button>
+        </div>
+
+      </div>
+
+      <!-- MAINTENANCE — shown only for lifetime users -->
+      <div class="maintenance-section" id="maintenanceSection">
+        <div class="maintenance-box">
+          <div class="maintenance-title">🔧 Renew Maintenance — ₹200/month</div>
+          <div class="maintenance-desc">
+            You're a lifetime member! Just renew your monthly maintenance to keep access active.
+          </div>
+          <button class="pay-btn pay-maint" onclick="startPayment('maintenance', 20000)">
+            ✅ Pay ₹200 Maintenance
+          </button>
+        </div>
+      </div>
+
+      <button class="modal-close" onclick="closePricing()">✕ Maybe later</button>
+    </div>
+  </div>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    const API_URL      = "http://localhost:8000"
+    const RAZORPAY_KEY = "YOUR_RAZORPAY_KEY_ID"   // ← paste your key here
+
+    let selectedTone     = "professional"
+    let lastResult       = null
+    let currentUserEmail = ""
+    let currentPlan      = "free"
+
+    window.onload = () => {
+      const saved = localStorage.getItem("coldEmailUser")
+      if (saved) {
+        document.getElementById("userEmail").value = saved
+        loadUser(saved)
+      }
+    }
+
+    function onEmailChange(email) {
+      if (email && email.includes("@")) loadUser(email)
+    }
+
+    async function loadUser(email) {
+      email = email.toLowerCase().trim()
+      try {
+        const res  = await fetch(API_URL + "/user/" + encodeURIComponent(email))
+        const data = await res.json()
+        currentUserEmail = email
+        currentPlan      = data.plan
+        localStorage.setItem("coldEmailUser", email)
+        updatePlanBar(data)
+      } catch(e) {
+        console.log("Could not load user:", e)
+      }
+    }
+
+    function updatePlanBar(data) {
+      document.getElementById("planBar").style.display = "flex"
+      document.getElementById("planEmail").textContent = data.email
+
+      const badge = document.getElementById("planBadge")
+      const info  = document.getElementById("planInfo")
+      const maint = document.getElementById("maintenanceSection")
+
+      if (data.plan === "free") {
+        badge.className   = "plan-badge plan-free"
+        badge.textContent = "🆓 Free"
+        info.textContent  = data.emails_used + "/1 free email used"
+        maint.style.display = "none"
+      } else if (data.plan === "monthly") {
+        badge.className   = "plan-badge plan-monthly"
+        badge.textContent = "📅 Monthly"
+        info.textContent  = "Active till " + (data.access && data.access.plan_end ? data.access.plan_end : "")
+        maint.style.display = "none"
+      } else if (data.plan === "lifetime") {
+        badge.className   = "plan-badge plan-lifetime"
+        badge.textContent = "♾️ Lifetime"
+        info.textContent  = "Maintenance till " + (data.access && data.access.maintenance_paid_till ? data.access.maintenance_paid_till : "N/A")
+        maint.style.display = "block"
+      }
+    }
+
+    document.querySelectorAll(".tone-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(".tone-btn").forEach(function(b) { b.classList.remove("active") })
+        btn.classList.add("active")
+        selectedTone = btn.dataset.tone
+      })
+    })
+
+    document.getElementById("linkedinProfile").addEventListener("input", function() {
+      document.getElementById("charCount").textContent = this.value.length + " characters pasted"
+    })
+
+    function showError(msg) {
+      document.getElementById("errorMsg").textContent = msg
+      document.getElementById("errorBox").style.display = "block"
+    }
+
+    function hideError() {
+      document.getElementById("errorBox").style.display = "none"
+    }
+
+    async function generateEmail() {
+      var linkedinProfile = document.getElementById("linkedinProfile").value.trim()
+      var senderName      = document.getElementById("senderName").value.trim()
+      var senderProduct   = document.getElementById("senderProduct").value.trim()
+      var userEmail       = document.getElementById("userEmail").value.trim().toLowerCase()
+
+      hideError()
+
+      if (!userEmail || !userEmail.includes("@")) { showError("Please enter your email first"); return }
+      if (!linkedinProfile)                        { showError("Please paste a LinkedIn profile"); return }
+      if (linkedinProfile.length < 20)             { showError("Profile too short. Paste more details."); return }
+      if (!senderName)                             { showError("Please enter your name"); return }
+      if (!senderProduct)                          { showError("Please enter what you're offering"); return }
+
+      var btn    = document.getElementById("generateBtn")
+      btn.disabled = true
+      btn.innerHTML = '<span class="spinner"></span> Generating your email...'
+      document.getElementById("resultCard").style.display = "none"
+
+      try {
+        var response = await fetch(API_URL + "/generate-email", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            linkedin_profile: linkedinProfile,
+            sender_name:      senderName,
+            sender_product:   senderProduct,
+            tone:             selectedTone,
+            user_email:       userEmail
+          })
+        })
+
+        if (!response.ok) {
+          var err = await response.json()
+          if (response.status === 429) openPricing()
+          throw new Error(err.detail || "Something went wrong.")
+        }
+
+        var data = await response.json()
+        lastResult = data
+
+        await loadUser(userEmail)
+
+        document.getElementById("subjectBox").textContent = data.subject
+        document.getElementById("bodyBox").textContent    = data.body
+
+        var resultCard = document.getElementById("resultCard")
+        resultCard.style.display = "block"
+        resultCard.classList.add("fade-in")
+        resultCard.scrollIntoView({ behavior: "smooth", block: "start" })
+
+      } catch(err) {
+        showError(err.message)
+      }
+
+      btn.disabled  = false
+      btn.innerHTML = "✨ Generate Cold Email"
+    }
+
+    function copyEmail() {
+      if (!lastResult) return
+      var full = "Subject: " + lastResult.subject + "\n\n" + lastResult.body
+      navigator.clipboard.writeText(full).then(function() {
+        var btn = document.getElementById("copyBtn")
+        btn.textContent = "✅ Copied!"
+        btn.classList.add("copied")
+        setTimeout(function() {
+          btn.textContent = "📋 Copy Email"
+          btn.classList.remove("copied")
+        }, 2000)
+      })
+    }
+
+    function openPricing() {
+      if (currentPlan === "lifetime") {
+        document.getElementById("maintenanceSection").style.display = "block"
+      }
+      document.getElementById("pricingModal").classList.add("open")
+    }
+
+    function closePricing() {
+      document.getElementById("pricingModal").classList.remove("open")
+    }
+
+    function startPayment(plan, amount) {
+      var email = document.getElementById("userEmail").value.trim().toLowerCase()
+      if (!email || !email.includes("@")) {
+        alert("Please enter your email first!")
+        closePricing()
+        return
+      }
+
+      var planNames = {
+        monthly:     "Monthly Plan — Unlimited Emails",
+        lifetime:    "Lifetime Plan — One Time",
+        maintenance: "Lifetime Maintenance — Rs.200/month"
+      }
+
+      var options = {
+        key:         RAZORPAY_KEY,
+        amount:      amount,
+        currency:    "INR",
+        name:        "Cold Email AI",
+        description: planNames[plan],
+        prefill:     { email: email },
+        theme:       { color: "#7c3aed" },
+
+        handler: async function(response) {
+          var res = await fetch(API_URL + "/confirm-payment", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_email: email,
+              payment_id: response.razorpay_payment_id,
+              plan:       plan
+            })
+          })
+          var data = await res.json()
+          if (data.success) {
+            closePricing()
+            await loadUser(email)
+            alert("Payment successful! Your " + plan + " plan is now active.")
+          }
+        }
+      }
+
+      var rzp = new Razorpay(options)
+      rzp.open()
+    }
+  </script>
+</body>
+</html>

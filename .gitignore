@@ -1,0 +1,19 @@
+# Secret files — NEVER upload these
+.env
+users.json
+usage.json
+
+# Python cache — not needed
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VS Code settings
+.vscode/
+
+# Mac OS junk
+.DS_Store
+
+# Windows junk
+Thumbs.db
